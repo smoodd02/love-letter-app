@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Đọc Thư Tình</title>
+<style>
+  body {
+    font-family: sans-serif;
+    max-width: 480px;
+    margin: 2rem auto;
+    background: #fff0f5;
+    padding: 1.5rem;
+    border-radius: 15px;
+  }
+  h2 {
+    text-align: center;
+    color: #e91e63;
+  }
+  #passwordSection {
+    margin-top: 1rem;
+  }
+  input[type=password] {
+    width: 100%;
+    padding: 0.6rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+  }
+  button {
+    margin-top: 0.8rem;
+    background:#e91e63; color:#fff; border:none;
+    font-weight: bold; border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 1.1rem;
+  }
+  #errorMsg {
+    color: red;
+    margin-top: 0.5rem;
+    display: none;
+  }
+  #letterContent {
+    margin-top: 1.5rem;
+    display: none;
+    white-space: pre-wrap;
+    border: 1px solid #e91e63;
+    padding: 1rem;
+    border-radius: 12px;
+  }
+  #senderLine {
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+  #imagesAlbum {
+    margin-top: 1rem;
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+  }
+  #imagesAlbum img {
+    height: 120px;
+    border-radius: 8px;
+  }
+</style>
+</head>
+<body>
+
+<h2>Thư Tình Online</h2>
+
+<div id="passwordSection">
+  <label for="passwordInput">Nhập mật khẩu để mở thư:</label>
+  <input type="password" id="passwordInput" placeholder="Mật khẩu..." />
+  <button id="openBtn">Xem Thư</button>
+  <div id="errorMsg">Mật khẩu không đúng, vui lòng thử lại!</div>
+</div>
+
+<div id="letterContent">
+  <div id="senderLine"></div>
+  <div id="contentText"></div>
+  <div id="imagesAlbum"></div>
+</div>
+
+<script>
+  function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+  }
+
+  const id = getQueryParam("id");
+  if (!id) {
+    alert("Link không hợp lệ!");
+  }
+
+  const letterDataRaw = localStorage.getItem("loveLetter_" + id);
+  if (!letterDataRaw) {
+    alert("Không tìm thấy thư hoặc thư đã bị xóa.");
+  }
+  const letterData = JSON.parse(letterDataRaw);
+
+  const passwordInput = document.getElementById("passwordInput");
+  const openBtn = document.getElementById("openBtn");
+  const errorMsg = document.getElementById("errorMsg");
+  const letterContent = document.getElementById("letterContent");
+  const senderLine = document.getElementById("senderLine");
+  const contentText = document.getElementById("contentText");
+  const imagesAlbum = document.getElementById("imagesAlbum");
+  const passwordSection = document.getElementById("passwordSection");
+
+  openBtn.addEventListener("click", () => {
+    const passInput = passwordInput.value;
+    if (passInput === letterData.password) {
+      errorMsg.style.display = "none";
+      passwordSection.style.display = "none";
+
+      senderLine.textContent = `Người gửi: ${letterData.sender}`;
+      contentText.textContent = letterData.content;
+      contentText.style.fontFamily = letterData.font;
+
+      imagesAlbum.innerHTML = "";
+      if (letterData.images && letterData.images.length > 0) {
+        letterData.images.forEach(src => {
+          const img = document.createElement("img");
+          img.src = src;
+          imagesAlbum.appendChild(img);
+        });
+      }
+
+      letterContent.style.display = "block";
+    } else {
+      errorMsg.style.display = "block";
+      letterContent.style.display = "none";
+    }
+  });
+</script>
+
+</body>
+</html>
